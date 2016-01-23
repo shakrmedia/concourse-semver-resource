@@ -62,7 +62,26 @@ func FromSource(source models.Source) (Driver, error) {
 			Bucket: bucket,
 			Key:    source.Key,
 		}, nil
+	case models.DriverGCS:
+		auth := aws.Auth{
+			AccessKey: source.AccessKeyID,
+			SecretKey: source.SecretAccessKey,
+		}
 
+		region := aws.Region{
+			Name: "gcs",
+			S3Endpoint: "https://storage.googleapis.com"
+		}
+
+		client := s3.New(auth, region)
+		bucket := client.Bucket(source.Bucket)
+
+		return &S3Driver{
+			InitialVersion: initialVersion,
+
+			Bucket: bucket,
+			Key:    source.Key,
+		}, nil
 	case models.DriverGit:
 		return &GitDriver{
 			InitialVersion: initialVersion,
